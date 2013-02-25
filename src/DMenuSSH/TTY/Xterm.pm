@@ -1,4 +1,3 @@
-#!/usr/bin/env perl
 #
 # Copyright 2013 Steven Knight
 #
@@ -14,19 +13,29 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-package DMenuSSH::Launcher::Base;
-use Mouse;
+package DMenuSSH::TTY::Xterm;
 
 use strict;
 use warnings 'all';
 use Carp;
 use Data::Dumper;
+
 use Config::Simple;
+use Mouse;
 
-has 'ssh_hosts' =>(is => 'rw', 'isa' => 'ArrayRef', required => 0);
+extends 'DMenuSSH::TTY::Base';
 
-sub choose_host {
-    confess "Abstract method - Sub-class needs to implement this method.\n"
+use main;
+
+sub connect_to {
+   my ($self, $host) = @_;
+   my $cfg = main::get_config();
+   my $terminal = $cfg->param('TTY.Terminal');
+   my $terminal_arguments = $cfg->param('TTY.TerminalArguments');
+   my $cmd = "$terminal $terminal_arguments 'ssh $host'";
+   print "cmd $cmd\n";
+   $self->daemonize();
+   system($cmd);
 }
 
 1;

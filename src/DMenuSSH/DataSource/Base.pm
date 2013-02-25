@@ -27,4 +27,25 @@ sub execute {
     my ($self) = @_;
 }
 
+sub list_ssh_hosts {
+    confess "Abstract method - Sub-class needs to implement this method.\n";
+}
+
+sub add_host {
+    confess "Abstract method - Sub-class needs to implement this method.\n"
+}
+
+sub save_to_data_source {
+    confess "Abstract method - Sub-class needs to implement this method.\n"
+}
+
+sub load_from_data_source {
+    confess "Abstract method - Sub-class needs to implement this method.\n"
+}
+
+sub load_know_hosts {
+    confess "Abstract method - Sub-class needs to implement this method.\n"
+}
+
+
 1;

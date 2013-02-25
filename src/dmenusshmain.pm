@@ -23,12 +23,19 @@ use Carp;
 use Data::Dumper;
 use Config::Simple;
 use Class::Load qw/try_load_class/;
+use IPC::Run qw/run timeout start finish/;
 
-has cfg => (is => 'rw', isa => 'Config::Simple', required => 1);
-has launcher => (is => 'rw', isa => 'DMenuSSH::Launcher::Base', required => 1);
+has 'launcher' => (is => 'rw', isa => 'DMenuSSH::Launcher::Base', required => 1);
+has 'data_source' => (is => 'rw', isa => 'DMenuSSH::DataSource::Base', required => 0);
+has 'tty' => (is => 'rw', isa => 'DMenuSSH::TTY::Base', required => 0);
 
 sub execute {
     my ($self) = @_;
+    $self->data_source->load_from_data_source;
+    my @ssh_hosts = $self->data_source->list_ssh_hosts;
+    $self->launcher->ssh_hosts(\@ssh_hosts);
+    my $host = $self->launcher->choose_host();
+    $self->tty->connect_to($host);
 }
 
 1;

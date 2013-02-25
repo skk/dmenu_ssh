@@ -31,7 +31,7 @@ use Class::Load qw/try_load_class/;
 use dmenusshmain;
 
 sub get_config {
-    my $xdg_config_home = ($ENV{"XDG_CONFIG_HOME"} || $ENV{"HOME"} ). ".config" || 
+    my $xdg_config_home = $ENV{"XDG_CONFIG_HOME"} || $ENV{"HOME"} . ".config" ||
         croak "Neither \$HOME nor \$XDG_CONFIG_HOME are set.";
     my $config_dir = $xdg_config_home . "/dmenussh/";
 
@@ -43,25 +43,39 @@ sub get_config {
         my $default = Config::Simple->new("dmenussh_default.conf");
         $default->write($config_file);
     }
+
     return Config::Simple->new($config_file);
 }
 
 sub get_class {
     my ($classname, $class_options) = @_;
+    if (!$classname) {
+        confess "Unable to load class; Classname is null.";
+    }
     if (!$class_options) {
         $class_options = {};
     }
-    try_load_class($classname) || confess "Unable to load class $classname";
-    my $launcher = $classname->new($class_options);
+    my ($status, @errors) = try_load_class($classname);
+    if (!$status) {
+        my $msg = join "\n", map { $_ . "\n" } @errors;
+        confess "Unable to load class $classname: $msg";
+    }
+    return $classname->new($class_options);
 }
 
 sub main {
     my $cfg = get_config();
+    use FindBin qw($Bin);
 
     my $launcher = get_class($cfg->param("General.Launcher"));
-    my $dmenusshmain = dmenusshmain->new(cfg => $cfg,
-                                         launcher => $launcher);
-    $dmenusshmain->execute();
+    my $tty= get_class($cfg->param("General.TTY"));
+    my $data_source = get_class($cfg->param("General.DataSource"),
+                                {filename => "$Bin/" . $cfg->param("DataSource.FileName")});
+    my $dsm = dmenusshmain->new(cfg => $cfg,
+                                data_source => $data_source,
+                                tty => $tty,
+                                launcher => $launcher);
+    $dsm->execute();
 }
 
 1;

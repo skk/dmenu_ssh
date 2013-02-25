@@ -26,8 +26,15 @@ use Mouse;
 
 extends 'DMenuSSH::Launcher::Base';
 
-sub execute {
-    my ($self) = @_;
+sub choose_host {
+    my $self = shift;
+    my $dmenu = "dmenu";
+    my $dmenu_opts = "";
+    my @hosts = @{ $self->ssh_hosts };
+    my $cmd = "echo '" . join("\n", @hosts ) . "' | $dmenu $dmenu_opts";
+    my $chosen_host = `$cmd`;
+    chomp($chosen_host);
+    return $chosen_host;
 }
 
 1;

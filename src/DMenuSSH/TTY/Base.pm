@@ -14,7 +14,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-package DMenuSSH::Launcher::Base;
+package DMenuSSH::TTY::Base;
+
 use Mouse;
 
 use strict;
@@ -22,11 +23,22 @@ use warnings 'all';
 use Carp;
 use Data::Dumper;
 use Config::Simple;
+use POSIX "setsid";
 
-has 'ssh_hosts' =>(is => 'rw', 'isa' => 'ArrayRef', required => 0);
-
-sub choose_host {
+sub connect_to {
     confess "Abstract method - Sub-class needs to implement this method.\n"
+}
+
+
+sub daemonize {
+    my ($self) = @_;
+    chdir("/") || die "can't chdir to /: $!";
+    open(STDIN,  "< /dev/null") || die "can't read /dev/null: $!";
+    open(STDOUT, "> /dev/null") || die "can't write to /dev/null: $!";
+    defined(my $pid = fork()) || die "can't fork: $!";
+    exit if $pid; # non-zero now means I am the parent
+    (setsid() != -1) || die "Can't start a new session: $!";
+    open(STDERR, ">&STDOUT") || die "can't dup stdout: $!";
 }
 
 1;
