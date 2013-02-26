@@ -22,18 +22,17 @@ use Carp;
 use Data::Dumper;
 use Config::Simple;
 use FileHandle;
+use Socket;
 use Storable qw/store_fd fd_retrieve retrieve store/;
+use DateTime;
+use DMenuSSH::DataRecord;
 
 extends 'DMenuSSH::DataSource::Base';
 
 has 'filename' => (is => 'ro', isa => 'Str', required => 1);
-#has 'filehandle' => (is => 'ro', isa => 'FileHandle', required => 0, builder => 'build_filehandle');
-has 'storable' => (is => 'rw', isa => 'Ref', required => 0, builder => 'build_storable');
 
-#sub build_filehandle {
-#    my $self = shift;
-#    return FileHandle->new($self->filename, "w");
-#}
+# TODO This should be removed and should be moved to super-class
+has 'storable' => (is => 'rw', isa => 'DMenuSSH::DataRecord', required => 0, builder => 'build_storable');
 
 sub build_storable {
     my $self = shift;
@@ -43,35 +42,24 @@ sub build_storable {
     };
     if ($@) {
         #print "Unable to retrieve data: $@\n.";
-        $data = \{};
+        $data = DMenuSSH::DataRecord->new;
     }
     $self->storable($data);
 }
 
-sub load_know_hosts {
-    my $self = shift;
-    # TODO: Can this be any other path?
-    my $ssh_known_hosts =  $ENV{HOME} . "/.ssh/known_hosts";
-    #print "filename $ssh_known_hosts\n";
-    my %hosts;
-
-    my $fh_read;
-    open( $fh_read, '<', $ssh_known_hosts) or confess "Can't open $ssh_known_hosts $!";
-    while ( my $line = <$fh_read> ) {if ($line =~ m/^(.*),(\d*.\d*.\d*.\d*) (.*)$/) {
-            #print "1 $1, 2 $2\n";
-            $hosts{$1} = 1;
-        }
-    }
-    return \%hosts;
-}
-
+# ssh hosts, order by 
 sub list_ssh_hosts {
     my $self = shift;
-    if (ref $self->storable eq 'HASH') {
-        return keys $self->storable;
+    my %hosts = %{ $self->storable->hosts };
+    if (%hosts) {
+        return map  { $_->[0] }
+               sort { $b->[1] <=> $a->[1] }
+               map  { [$_, $hosts{$_}] }
+               grep { $_ ne '' }
+                 keys %hosts;
     }
     else {
-        return [];
+        return ();
     }
 }
 
@@ -81,14 +69,29 @@ sub add_host {
 
 sub save_to_data_source {
     my $self = shift;
+    my $data = $self->storable;
+    store $data, $self->filename();
+}
+
+sub log_connect_to {
+    my ($self, $hostname) = @_;
+    my %hosts= %{ $self->storable->hosts };
+    my $count = $hosts{$hostname};
+    $self->storable->hosts->{$hostname} = $count + 1;
+    my $data = $self->storable;
 }
 
 sub load_from_data_source {
     my $self = shift;
-    my $rv = (ref $self->storable() eq '') ? 1 : 0;
-    if (!$rv) {
-        my $data = $self->load_know_hosts;
-        $self->storable($data);
+    my $hosts = $self->storable->hosts || \();
+    if ($hosts) {
+        my $last_read_ssh_known_hosts_file = $self->storable->last_read_ssh_known_hosts_file || undef;
+        if ( !defined $last_read_ssh_known_hosts_file ||
+             DateTime->now->ymd ne $self->storable->last_read_ssh_known_hosts_file->ymd) {
+            my $data = $self->load_known_hosts;
+            $self->storable->hosts($data);
+            $self->storable->last_read_ssh_known_hosts_file(DateTime->now); #$last_read_ssh_known_hosts_file);
+        }
     }
 }
 

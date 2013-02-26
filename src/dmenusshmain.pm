@@ -1,5 +1,3 @@
-#!/usr/bin/env perl
-#
 # Copyright 2013 Steven Knight
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -35,7 +33,9 @@ sub execute {
     my @ssh_hosts = $self->data_source->list_ssh_hosts;
     $self->launcher->ssh_hosts(\@ssh_hosts);
     my $host = $self->launcher->choose_host();
+    $self->data_source->log_connect_to($host);
     $self->tty->connect_to($host);
+    $self->data_source->save_to_data_source;
 }
 
 1;

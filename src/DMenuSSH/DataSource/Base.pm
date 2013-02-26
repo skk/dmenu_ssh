@@ -22,6 +22,7 @@ use warnings 'all';
 use Carp;
 use Data::Dumper;
 use Config::Simple;
+use Socket;
 
 sub execute {
     my ($self) = @_;
@@ -43,9 +44,34 @@ sub load_from_data_source {
     confess "Abstract method - Sub-class needs to implement this method.\n"
 }
 
-sub load_know_hosts {
+sub log_connect_to {
     confess "Abstract method - Sub-class needs to implement this method.\n"
 }
+
+sub load_known_hosts {
+    my $self = shift;
+    # TODO: Can this be any other path?
+    my $ssh_known_hosts =  $ENV{HOME} . "/.ssh/known_hosts";
+    my %hosts;
+
+    my $fh_read;
+    open( $fh_read, '<', $ssh_known_hosts) or confess "Can't open $ssh_known_hosts $!";
+    while ( my $line = <$fh_read> ) {
+        if ($line =~ m/^([.\w]*),{0,1}\s(.*)$/) {
+            #my $ip = $1;
+            #my $name = $1;
+            my $ip = inet_aton($1);
+            if ($ip) {
+              my ($name,$aliases,$addrtype,$length,@addrs) = gethostbyaddr($ip, AF_INET);
+              if ($name) {
+                  $hosts{$name} = 1;
+              }
+          }
+        }
+    }
+    return \%hosts;
+}
+
 
 
 1;
