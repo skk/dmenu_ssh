@@ -1,22 +1,18 @@
-TODO
 
-## Dependencies
+= dmenu_ssh
 
-1. Git
-1. Perl
-1. Mouse (https://metacpan.org/module/Mouse)
-1. Config::Simple (http://search.cpan.org/perldoc?Config%3A%3ASimple)
-1. Class::Load (http://search.cpan.org/perldoc?Class%3A%3ALoad)
+Description goes here.
 
-### Mouse
+== Contributing to dmenu_ssh
 
-If you can't install Mouse via cpan or your package manager (e.g. apt, yum,
-pacman, etc), you can still use scm-prompt.  Please follow these steps:
+* Check out the latest master to make sure the feature hasn't been implemented or the bug hasn't been fixed yet.
+* Check out the issue tracker to make sure someone already hasn't requested it and/or contributed it.
+* Fork the project.
+* Start a feature/bugfix branch.
+* Commit and push until you are happy with your contribution.
+* Make sure to add tests for it. This is important so I don't break it in a future version unintentionally.
+* Please try not to mess with the Rakefile, version, or history. If you want to have your own version, or is otherwise necessary, that is fine, but please isolate to its own commit so I can cherry-pick around it.
 
-1. cd to <path to scm-prompt>
-1. mkdir vendor
-1. cd vendor
-1. wget http://cpan.metacpan.org/authors/id/G/GF/GFUJI/Mouse-1.05.tar.gz
-1. tar xfz Mouse-1.05.tar.gz
-1. mv Mouse-1.05 Mouse
+== Copyright
 
+Copyright (c) 2014 Steven Knight. See LICENSE.txt for further details.
