@@ -52,24 +52,26 @@ sub load_known_hosts {
     my $self = shift;
     # TODO: Can this be any other path?
     my $ssh_known_hosts =  $ENV{HOME} . "/.ssh/known_hosts";
-    my %hosts;
-
-    my $fh_read;
-    open( $fh_read, '<', $ssh_known_hosts) or confess "Can't open $ssh_known_hosts $!";
-    while ( my $line = <$fh_read> ) {
-        if ($line =~ m/^([.\w]*),{0,1}\s(.*)$/) {
-            #my $ip = $1;
-            #my $name = $1;
-            my $ip = inet_aton($1);
-            if ($ip) {
-              my ($name,$aliases,$addrtype,$length,@addrs) = gethostbyaddr($ip, AF_INET);
-              if ($name) {
-                  $hosts{$name} = 1;
-              }
-          }
-        }
-    }
+    my %hosts = ();
+    # Don't load hosts from ~/.sskn/known_hosts file
     return \%hosts;
+
+    # my $fh_read;
+    # open( $fh_read, '<', $ssh_known_hosts) or confess "Can't open $ssh_known_hosts $!";
+    # while ( my $line = <$fh_read> ) {
+    #     if ($line =~ m/^([.\w]*),{0,1}\s(.*)$/) {
+    #         #my $ip = $1;
+    #         #my $name = $1;
+    #         my $ip = inet_aton($1);
+    #         if ($ip) {
+    #           my ($name,$aliases,$addrtype,$length,@addrs) = gethostbyaddr($ip, AF_INET);
+    #           if ($name) {
+    #               $hosts{$name} = 1;
+    #           }
+    #       }
+    #     }
+    # }
+    # return \%hosts;
 }
 
 
