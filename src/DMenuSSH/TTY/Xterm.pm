@@ -32,8 +32,8 @@ sub connect_to {
    my $cfg = main::get_config();
    my $terminal = $cfg->param('TTY.Terminal');
    my $terminal_arguments = $cfg->param('TTY.TerminalArguments');
-   my $cmd = "$terminal $terminal_arguments 'ssh $host'";
-   #print "cmd $cmd\n";
+   my $cmd = "$terminal $terminal_arguments ssh $host";
+   print "cmd $cmd\n";
    $self->daemonize();
    system($cmd);
 }
