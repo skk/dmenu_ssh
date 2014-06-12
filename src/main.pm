@@ -31,7 +31,7 @@ use Class::Load qw/try_load_class/;
 use dmenusshmain;
 
 sub get_config {
-    my $xdg_config_home = $ENV{"XDG_CONFIG_HOME"} || $ENV{"HOME"} . ".config" ||
+    my $xdg_config_home = $ENV{"XDG_CONFIG_HOME"} || $ENV{"HOME"} . "/.config" ||
         croak "Neither \$HOME nor \$XDG_CONFIG_HOME are set.";
     my $config_dir = $xdg_config_home . "/dmenussh/";
 
