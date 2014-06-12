@@ -47,7 +47,7 @@ sub build_storable {
     $self->storable($data);
 }
 
-# ssh hosts, order by 
+# ssh hosts, order by
 sub list_ssh_hosts {
     my $self = shift;
     my %hosts = %{ $self->storable->hosts };
@@ -76,7 +76,7 @@ sub save_to_data_source {
 sub log_connect_to {
     my ($self, $hostname) = @_;
     my %hosts= %{ $self->storable->hosts };
-    my $count = $hosts{$hostname};
+    my $count = $hosts{$hostname} || 0;
     $self->storable->hosts->{$hostname} = $count + 1;
     my $data = $self->storable;
 }
